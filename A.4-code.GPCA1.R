@@ -41,19 +41,6 @@ variable1 <- read.csv("health determinants data.csv")
 municipio <- variable1$name
 
 
-MAcol_big = colorRampPalette(c("#53247F", "#00447F", "#4D868E", "#00703C", "#A99A6F", "#FFF6DC", "#FFC425", "#F99D31", "#BE0C15", "#551900") , bias = 1, space = "rgb")
-MAcol_biglight = colorRampPalette(c("#C29DE3", "#85C5FF", "#95BFC5", "#C1FFE1", "#D7D0BB", "#FFFBEF","#FFE497", "#FBC27D", "#F9A1A5") , bias = 1, space = "rgb")
-
-MAcol_base = colorRampPalette(c("#53247F", "#00447F", "#4D868E", "#FFC425", "#F99D31", "#BE0C15"), bias = 1, space = "rgb")
-MAcol_baselight = colorRampPalette(c("#C29DE3", "#85C5FF", "#95BFC5", "#FFD765", "#FAB460", "#F9A1A5"), bias = 1, space = "rgb")
-
-MAcol_neutral = colorRampPalette(c("#000000", "#898C8C", "#FFFFFF", "#715F49", "#C5AA85"), bias = 1, space = "rgb")
-MAcol_neuratllight = colorRampPalette(c("#DEDEDE"))
-MAcol_cowa = colorRampPalette(c("#DEDEDE", "#C29DE3","#85C5FF", "#9BFFCF","#F77D83", "#FFD765"), bias = 1, space = "rgb")
-MAcol_warm = colorRampPalette(c("#DEDEDE","#F9A1A5", "#FFE497"), bias = 1, space = "rgb")
-MAcol_cold = colorRampPalette(c("#C29DE3","#85C5FF", "#C1FFE1"), bias = 1, space = "rgb")
-
-
 
 
 #MISSING VALUES
