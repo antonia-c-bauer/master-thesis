@@ -28,15 +28,15 @@ library(psych)
 
 
 
-#avoid scientific notation (promt=Eingabeaufforderung =>??)
+#avoid scientific notation
 options(prompt="R> ", scipen=999)
 
 
-#set working directory (=> wd) and load data
+#set working directory
 setwd("C:/Users/Antonia/Desktop/Documents/R/master/")
 
 
-#read the csv files
+#load data
 variable1 <- read.csv("health determinants data.csv")
 municipio <- variable1$name
 
@@ -56,40 +56,24 @@ MAcol_cold = colorRampPalette(c("#C29DE3","#85C5FF", "#C1FFE1"), bias = 1, space
 
 
 
-#PREPARE DATA VARIABLE1
-
-#get the object class
-class(variable1)
-
-#get the object type
-typeof(variable1)
-
-#get the object structure
-str(variable1)
-
-#get the object attributes
-attributes(variable1)
-
-#get the dimensions of the object
-dim(variable1)
+#MISSING VALUES
 
 #delete the first two columns ID and name
 variable1 <- variable1[,-1:-2]
 
-#checking on missing values in var1
+#substitute blanks with NA
 variable1[variable1 == ""] <- NA
-#write.csv(variable1, "C:/Users/Antonia/Desktop/Documents/R/master/variable1_NA.csv", row.names=FALSE)
 
-#see how many NA in each variable / municipality
+#see how many NA are in each variable / municipality in absolute numbers
 colSums(is.na(variable1)) #variable
 rowSums(is.na(variable1)) #municipality
 
 #calculate the percentage of missing values per per column (2) and row (1)
 pmiss <- function(x){sum(is.na(x))/length(x)*100}
-apply(variable1,2,pmiss)
-apply(variable1,1,pmiss)
+apply(variable1,2,pmiss) #variable
+apply(variable1,1,pmiss) #municipality
 
-#delete variables with more than 5 % missing values from var1
+#delete variables with more than 5 % missing values from variable 1 (n = 9))
 variable1 <- subset(variable1, select = -c(ncr.house,
                                            r_edu_sec,
                                            robb.cri,
@@ -100,55 +84,29 @@ variable1 <- subset(variable1, select = -c(ncr.house,
                                            legis.cri,
                                            lice.cri))
 
-#single imputation method => mean substitution
 
-# replace NA in single columns => https://statisticsglobe.com/replace-missing-values-by-column-mean-in-r
-#variable1$i_gini_inco[is.na(variable1$i_gini_inco)] <- mean(variable1$i_gini_inco)
-#variable1$inju.cri[is.na(variable1$inju.cri)] <- mean(variable1$inju.cri)
-#variable1$vio.cri[is.na(variable1$vio.cri)] <- mean(variable1$vio.cri)
-#variable1$soci.cri[is.na(variable1$soci.cri)] <- mean(variable1$soci.cri)
+#for all other variables with missing values a single imputation method (here mean substitution) is applied
 
-#replace NA in all columns => https://statisticsglobe.com/replace-missing-values-by-column-mean-in-r
+#replace NA in all columns
 for(i in 1:ncol(variable1)) {
   variable1[ , i][is.na(variable1[ , i])] <- mean(variable1[ , i], na.rm = TRUE)
 }
 
-#other option to deal with NA values
-#data <- replace(data, is.na(data), 0)
 
-#write.csv(variable1, "C:/Users/Antonia/Desktop/Documents/R/master/variable1_NArm.csv", row.names=FALSE)
-
-
-help(scale)
 
 
 variable1 <- as.data.frame(scale(variable1))
 
 
 
-#check on outliers
+
+#MULTIDIMENSIONAL SCALING
+
 distance <- dist(variable1)
-
 mds_var1<-cmdscale(distance, k=2)
-
-
-#jpeg(filename = "C:/Users/Antonia/Desktop/Documents/R/master/plots/mds1.jpeg", width = 2000, height = 2000, units = "px", res = 300)
-plot(mds_var1, type='n',
-     xlab = "Dimension 1",
-     ylab = "Dimension 2",
-     main = "Multidimensional Scaling")
-text(mds_var1, labels=municipio, cex=0.6, adj=0.5)
-grid(nx = NULL, ny = NULL,
-     lty = 1,      # Grid line type
-     col = "gray", # Grid line color
-     lwd = 0.25)      # Grid line width
-#dev.off()
-
 
 mds_var1 <- as.data.frame(mds_var1)
 mds_var1 <- bind_cols(Municipio=municipio, mds_var1)
-
-
 
 
 pca1.var1.mds <- 
@@ -177,17 +135,7 @@ ggsave(filename = "pca1.var1.mds.jpg", plot = pca1.var1.mds, device = "jpg", pat
 
 
 
-
-
-
-
-
-
-
-
-
-
-#CORRELATION MATRIX 1 - VARIABLE 1
+#CORRELATION MATRIX 1
 
 var1_cormat <- round(cor(variable1),2)
 help(round)
@@ -254,60 +202,9 @@ write.csv(var1_cormat, "C:/Users/Antonia/Desktop/Documents/R/master/var1_cormat.
 
 
 
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 1 - PCA 1
 
-
-
-
-#PRINCIPAL COMPONENT ANALYSIS 1 - VARIABLE1 USING PRINCOMP (NOT USE HERE)
-
-#var1_pca1 <- princomp(variable1, cor = FALSE)  #use covariance matrix when values are standardized
-#summary(var1_pca1)
-
-#var1_pca1 <- princomp(variable1, cor = TRUE)    #use correlation matrix when values are not standardized
-#summary(var1_pca1)
-
-
-#save manually as 1000x1000 pixel jpg
-#biplot(var1_pca1)
-#jpeg(filename = "C:/Users/Antonia/Desktop/Documents/R/master/plots/biplot.var1_pca1.jpeg", width = 2000, height = 2000, units = "px", res = 300)
-#fviz_pca_var(var1_pca1, col.var = "black", labelsize = 2, repel = TRUE) +
-#  labs(title ="PCA biplot", x = "PC1 (30,4%)", y = "PC2 (12,4%)")
-#dev.off()
-
-
-#screeplot(var1_pca1)
-#jpeg( filename = "C:/Users/Antonia/Desktop/Documents/R/master/plots/screeplot.var1_pca1.jpeg", width = 2000, height = 2000, units = "px", res = 300)
-#fviz_eig(var1_pca1, addlabels = TRUE, barfill = "#4D868E") + #explains variance by default, but option: choice = c("eigenvalue")
-#  labs(title ="PCA screeplot", x = "Principal Components", y = "Proportion of Total Variance (%)")
-#  dev.off()
-
-  
-#get the eigenvalues of the components
-#var1_pca1_eig <- get_eigenvalue(var1_pca1)
-#var1_pca1_eig
-
-
-#loadings1_1 <- as.data.frame.matrix(var1_pca1$loadings)
-
-#rotate loadings, is that really necessary?
-#pca1.varimax <- varimax(var1_pca1$loadings[, 1:10],normalize =  TRUE)
-#pca1.varimax
-
-
-#write.csv(loadings1_1, file = "C:/Users/Antonia/Desktop/Documents/R/master/loadings1_1.csv")
-
-
-
-
-
-
-
-
-#VARIABLE 1 - PCA 1
 #var1 n = 144
-
-help("pca")
-
 
 var1_pca1 <- principal(r = variable1, nfactors = 144, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
 summary(var1_pca1)
@@ -322,10 +219,9 @@ print(var1_pca1_eig1)
 write.csv(var1_pca1_load1, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_pca1_load1.csv")
 
 
-
-
 #variables with eigenvalue >=1 are n=23
-#in EXCEL delete variables that in all first 23 components provide loadings between x[-0.6;0.6] (n = 63)
+#delete variables that in all first 23 components provide loadings between x[-0.6;0.6] (n = 63)
+
 var1_1 <- subset(variable1, select = -c(
   nores.bui,
   to1945.bui,
@@ -396,7 +292,8 @@ var1_1 <- subset(variable1, select = -c(
 
 
 
-#VARIABLE 1 - PCA 2
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 1 - PCA 2
+
 #var1 = 81 because 63 were deleted
 
 var1_pca2 <- pca(r = var1_1, nfactors = 81, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
@@ -411,10 +308,9 @@ print(var1_pca2_eig2)
 write.csv(var1_pca2_load2, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_pca2_load2.csv")
 
 
-
-
 #variables with eigenvalue >=1 are n=12
-#in EXCEL delete variables that in all first 12 components provide loadings between x[-0.6;0.6] (n = 8)
+#delete variables that in all first 12 components provide loadings between x[-0.6;0.6] (n = 8)
+
 var1_2 <- subset(var1_1, select = -c(
   ac.acc,
   noac.acc,
@@ -429,12 +325,12 @@ var1_2 <- subset(var1_1, select = -c(
 
 
 
-#VARIABLE 1 - PCA 3
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 1 - PCA 3
+
 #var1 = 73 because 8 were deleted
 
 var1_pca3 <- principal(r = var1_2, nfactors = 73, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
 print.psych(var1_pca3)
-
 
 #get the loadings
 var1_pca3_load3 <- var1_pca3$loadings
@@ -442,36 +338,28 @@ print(var1_pca3_load3)
 
 var1_pca3_load3 <- as.data.frame(var1_pca3_load3[1:73,1:73])
 
-
 #get the quality of representation (cos2)
 cos2 <- as.data.frame(var1_pca3_load3^2)
-
 
 #get the communalities
 communalities <- as.data.frame(rowSums(cos2[1:73,1:8]))
 
-
 #see proportion of total variance explained per PC
 prop.table(var1_pca3$values)
-
 
 #get the eigenvalues
 var1_pca3_eig3 <- as.data.frame(var1_pca3$values)
 
-
-#vertausche Spalten und Zeilen 
+#interchange columns and rows 
 eig3.df <- data.frame(t(var1_pca3_eig3))
-
 
 #copy column values 73 times
 eig3.copy <- data.frame(eig3.df[,1:73], ntimes=c(73))
 eig3.copy <- as.data.frame(lapply(eig3.copy, rep, eig3.copy$ntimes))
 eig3.copy <- eig3.copy[,-74]
 
-
 #get the contribution of the variables
 contribution <- as.data.frame(((var1_pca3_load3^2)/eig3.copy)*100)
-
 
 var1_pca3_eig3 <- as.data.frame(var1_pca3_eig3[1:10,1])
 
@@ -488,11 +376,8 @@ var1_scores <- as.data.frame(var1_scores)
 write.csv(var1_pca3_load3, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_pca3_load3.csv")
 write.csv(cos2, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_pca3_cos2.csv")
 write.csv(communalities, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_pca3_communalities.csv")
-
 write.csv(contribution, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_pca3_contribution.csv")
 write.csv(var1_scores, file = "C:/Users/Antonia/Desktop/Documents/R/master/var1_scores.csv")
-
-
 
 
 
@@ -521,12 +406,8 @@ ggsave(filename = "pca1.var1.biplot.jpg", plot = pca1.var1.biplot, device = "jpg
 
 
 
-
-
-
-
-
 #SCREEPLOT (EIGENVALUES) PCA 3
+
 pca1.var1.screeplot <- ggplot(var1_pca3_eig3, aes(x = reorder(comp10,-value), y = value, fill = value, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
   scale_fill_steps(high = "#4D868E", low = "#4D868E") +
@@ -563,8 +444,8 @@ str(variance)
 
 
 
-
 #BARPLOT PVT PCA 3
+
 pca1.var1.PTV <- ggplot(variance, aes(x = comp8, y = PTV, fill = PTV)) +
   geom_bar(stat = "identity", width = 0.9) +
   scale_fill_steps(high = "#4D868E", low = "#4D868E") +
@@ -588,10 +469,8 @@ ggsave(filename = "pca1.var1.PTV.jpg", plot = pca1.var1.PTV, device = "jpg", pat
 
 
 
-
-
-
 #BARPLOT CPVT PCA 3
+
 pca1.var1.CPTV <- ggplot(variance, aes(x = "", y = PTV, fill = comp8, group = PTV)) + #sort(PTV, decreasing = TRUE)/ sort(comp8, decreasing = TRUE)
   geom_bar(position="stack", stat="identity") +
   scale_fill_manual(values = c( "#C29DE3",  "#85C5FF", "#95BFC5",  "#C1FFE1",  "#D7D0BB" ,"#FFE497",  "#FBC27D", "#F9A1A5") ) +
@@ -614,7 +493,7 @@ ggsave(filename = "pca1.var1.CPTV.jpg", plot = pca1.var1.CPTV, device = "jpg", p
 
 
 
-#plot variables communalities PC1-PC8
+#BARPLOT COMMUNALITIES PC1-PC8
 
 pca1.var1.communalities <- ggplot(communalities, aes(x = reorder(rownames(communalities), -`rowSums(cos2[1:73, 1:8])`), y = `rowSums(cos2[1:73, 1:8])`, fill = `rowSums(cos2[1:73, 1:8])`, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -635,14 +514,6 @@ pca1.var1.communalities <- ggplot(communalities, aes(x = reorder(rownames(commun
 print(pca1.var1.communalities)
 
 ggsave(filename = "pca1.var1.communalities.jpg", plot = pca1.var1.communalities, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
 
 
 
@@ -689,7 +560,7 @@ str(PC8.contribution)
 
 
 
-#variable contribution PC1
+#PLOT VARIABLE CONTRIBUTION PC1
 
 pca1.var1.PC1cont <- ggplot(PC1.contribution, aes(x = reorder(var1names, -PC1cont), y = PC1cont, fill = PC1cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -714,8 +585,7 @@ ggsave(filename = "pca1.var1.PC1cont.jpg", plot = pca1.var1.PC1cont, device = "j
 
 
 
-
-#variable contribution PC2
+#PLOT VARIABLE CONTRIBUTION PC2
 
 pca1.var1.PC2cont <- ggplot(PC2.contribution, aes(x = reorder(var1names, -PC2cont), y = PC2cont, fill = PC2cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -740,8 +610,7 @@ ggsave(filename = "pca1.var1.PC2cont.jpg", plot = pca1.var1.PC2cont, device = "j
 
 
 
-
-#variable contribution PC3
+#PLOT VARIABLE CONTRIBUTION PC3
 
 pca1.var1.PC3cont <- ggplot(PC3.contribution, aes(x = reorder(var1names, -PC3cont), y = PC3cont, fill = PC3cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -766,8 +635,7 @@ ggsave(filename = "pca1.var1.PC3cont.jpg", plot = pca1.var1.PC3cont, device = "j
 
 
 
-
-#variable contribution PC4
+#PLOT VARIABLE CONTRIBUTION PC4
 
 pca1.var1.PC4cont <- ggplot(PC4.contribution, aes(x = reorder(var1names, -PC4cont), y = PC4cont, fill = PC4cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -792,8 +660,7 @@ ggsave(filename = "pca1.var1.PC4cont.jpg", plot = pca1.var1.PC4cont, device = "j
 
 
 
-
-#variable contribution PC5
+#PLOT VARIABLE CONTRIBUTION PC5
 
 pca1.var1.PC5cont <- ggplot(PC5.contribution, aes(x = reorder(var1names, -PC5cont), y = PC5cont, fill = PC5cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -818,8 +685,7 @@ ggsave(filename = "pca1.var1.PC5cont.jpg", plot = pca1.var1.PC5cont, device = "j
 
 
 
-
-#variable contribution PC6
+#PLOT VARIABLE CONTRIBUTION PC6
 
 pca1.var1.PC6cont <- ggplot(PC6.contribution, aes(x = reorder(var1names, -PC6cont), y = PC6cont, fill = PC6cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -844,34 +710,7 @@ ggsave(filename = "pca1.var1.PC6cont.jpg", plot = pca1.var1.PC6cont, device = "j
 
 
 
-
-#variable contribution PC7
-
-pca1.var1.PC7cont <- ggplot(PC7.contribution, aes(x = reorder(var1names, -PC7cont), y = PC7cont, fill = PC7cont, group = 1)) +
-  geom_bar(stat = "identity", width = 0.9) +
-  scale_fill_steps(high = "#4D868E", low = "#4D868E") +
-  theme_bw() + 
-  theme(text = element_text(size = 16)) +
-  ggtitle("Proportion of Variable Contribution to PC7") +
-  theme(legend.position = "none") +
-  theme(panel.border = element_blank()) +
-  #  geom_text(aes(label = var1names), vjust= -0.5, size = 3) +
-  xlab("Variables") +
-  theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))) +
-  ylab("Contribution (%)") +
-  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))) +
-  theme(axis.text.x = element_text(vjust = 0.5, hjust = 0.1, size = 10, angle = 90)) +
-  coord_cartesian(expand = FALSE, xlim = c(0.5,NA), ylim = c(-0.1, 15))
-
-print(pca1.var1.PC7cont)
-
-ggsave(filename = "pca1.var1.PC7cont.jpg", plot = pca1.var1.PC7cont, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
-
-
-
-
-
-#variable contribution PC7
+#PLOT VARIABLE CONTRIBUTION PC7
 
 pca1.var1.PC7cont <- ggplot(PC7.contribution, aes(x = reorder(var1names, -PC7cont), y = PC7cont, fill = PC7cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -896,7 +735,32 @@ ggsave(filename = "pca1.var1.PC7cont.jpg", plot = pca1.var1.PC7cont, device = "j
 
 
 
-#variable contribution PC8
+#PLOT VARIABLE CONTRIBUTION PC7
+
+pca1.var1.PC7cont <- ggplot(PC7.contribution, aes(x = reorder(var1names, -PC7cont), y = PC7cont, fill = PC7cont, group = 1)) +
+  geom_bar(stat = "identity", width = 0.9) +
+  scale_fill_steps(high = "#4D868E", low = "#4D868E") +
+  theme_bw() + 
+  theme(text = element_text(size = 16)) +
+  ggtitle("Proportion of Variable Contribution to PC7") +
+  theme(legend.position = "none") +
+  theme(panel.border = element_blank()) +
+  #  geom_text(aes(label = var1names), vjust= -0.5, size = 3) +
+  xlab("Variables") +
+  theme(axis.title.x = element_text(margin = margin(t = 10, r = 0, b = 0, l = 0))) +
+  ylab("Contribution (%)") +
+  theme(axis.title.y = element_text(margin = margin(t = 0, r = 10, b = 0, l = 0))) +
+  theme(axis.text.x = element_text(vjust = 0.5, hjust = 0.1, size = 10, angle = 90)) +
+  coord_cartesian(expand = FALSE, xlim = c(0.5,NA), ylim = c(-0.1, 15))
+
+print(pca1.var1.PC7cont)
+
+ggsave(filename = "pca1.var1.PC7cont.jpg", plot = pca1.var1.PC7cont, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
+
+
+
+
+#PLOT VARIABLE CONTRIBUTION PC8
 
 pca1.var1.PC8cont <- ggplot(PC8.contribution, aes(x = reorder(var1names, -PC8cont), y = PC8cont, fill = PC8cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -917,8 +781,6 @@ pca1.var1.PC8cont <- ggplot(PC8.contribution, aes(x = reorder(var1names, -PC8con
 print(pca1.var1.PC8cont)
 
 ggsave(filename = "pca1.var1.PC8cont.jpg", plot = pca1.var1.PC8cont, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
-
-
 
 
 
@@ -947,14 +809,8 @@ pca3.sfdata <- merge(shp_muni,var1_scores, by="Municipio")
 
 
 
+#PLOT SCORE MAP PC1
 
-
-#explain scores
-#https://www.mun.ca/biology/scarr/2900_PCA_Analysis.htm#:~:text=The%20%27score%27%20of%20each%20individual,axes%20that%20can%20be%20graphed.
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC1score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC1)) +
@@ -991,9 +847,8 @@ ggsave(filename = "pca1.var1.PC1score.jpg", plot = pca1.var1.PC1score, device = 
 
 
 
+#PLOT SCORE MAP PC2
 
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC2score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC2)) +
@@ -1030,10 +885,8 @@ ggsave(filename = "pca1.var1.PC2score.jpg", plot = pca1.var1.PC2score, device = 
 
 
 
+#PLOT SCORE MAP PC3
 
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC3score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC3)) +
@@ -1070,11 +923,8 @@ ggsave(filename = "pca1.var1.PC3score.jpg", plot = pca1.var1.PC3score, device = 
 
 
 
+#PLOT SCORE MAP PC4
 
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC4score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC4)) +
@@ -1111,11 +961,8 @@ ggsave(filename = "pca1.var1.PC4score.jpg", plot = pca1.var1.PC4score, device = 
 
 
 
+#PLOT SCORE MAP PC5
 
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC5score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC5)) +
@@ -1152,14 +999,8 @@ ggsave(filename = "pca1.var1.PC5score.jpg", plot = pca1.var1.PC5score, device = 
 
 
 
+#PLOT SCORE MAP PC6
 
-
-
-
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC6score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC6)) +
@@ -1196,16 +1037,8 @@ ggsave(filename = "pca1.var1.PC6score.jpg", plot = pca1.var1.PC6score, device = 
 
 
 
+#PLOT SCORE MAP PC7
 
-
-
-
-
-
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC7score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC7)) +
@@ -1242,15 +1075,8 @@ ggsave(filename = "pca1.var1.PC7score.jpg", plot = pca1.var1.PC7score, device = 
 
 
 
+#PLOT SCORE MAP PC8
 
-
-
-
-
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca1.var1.PC8score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca3.sfdata, aes(fill = PC8)) +
@@ -1287,11 +1113,7 @@ ggsave(filename = "pca1.var1.PC8score.jpg", plot = pca1.var1.PC8score, device = 
 
 
 
-
-
-
-
-#plot loading and score positions
+#PLOT LOADING AND SCORE POSITIONS
 
 plot.scores1 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC1))
 plot.scores1$scores <- as.numeric(as.character(plot.scores1$scores))
@@ -1301,7 +1123,6 @@ ylim.sec <- c(-150, 150)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC1pos <- ggplot() +
@@ -1333,10 +1154,6 @@ ggsave(filename = "pca1.var1.PC1pos.jpg", plot = pca1.var1.PC1pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores2 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC2))
 plot.scores2$scores <- as.numeric(as.character(plot.scores2$scores))
 
@@ -1345,7 +1162,6 @@ ylim.sec <- c(-50, 50)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC2pos <- ggplot() +
@@ -1377,10 +1193,6 @@ ggsave(filename = "pca1.var1.PC2pos.jpg", plot = pca1.var1.PC2pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores3 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC3))
 plot.scores3$scores <- as.numeric(as.character(plot.scores3$scores))
 
@@ -1389,7 +1201,6 @@ ylim.sec <- c(-40, 40)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC3pos <- ggplot() +
@@ -1421,10 +1232,6 @@ ggsave(filename = "pca1.var1.PC3pos.jpg", plot = pca1.var1.PC3pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores4 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC4))
 plot.scores4$scores <- as.numeric(as.character(plot.scores4$scores))
 
@@ -1433,7 +1240,6 @@ ylim.sec <- c(-20, 20)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC4pos <- ggplot() +
@@ -1465,10 +1271,6 @@ ggsave(filename = "pca1.var1.PC4pos.jpg", plot = pca1.var1.PC4pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores5 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC5))
 plot.scores5$scores <- as.numeric(as.character(plot.scores5$scores))
 
@@ -1477,7 +1279,6 @@ ylim.sec <- c(-10, 10)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC5pos <- ggplot() +
@@ -1509,10 +1310,6 @@ ggsave(filename = "pca1.var1.PC5pos.jpg", plot = pca1.var1.PC5pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores6 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC6))
 plot.scores6$scores <- as.numeric(as.character(plot.scores6$scores))
 
@@ -1521,7 +1318,6 @@ ylim.sec <- c(-6, 6)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC6pos <- ggplot() +
@@ -1553,10 +1349,6 @@ ggsave(filename = "pca1.var1.PC6pos.jpg", plot = pca1.var1.PC6pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores7 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC7))
 plot.scores7$scores <- as.numeric(as.character(plot.scores7$scores))
 
@@ -1565,7 +1357,6 @@ ylim.sec <- c(-6, 6)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC7pos <- ggplot() +
@@ -1597,10 +1388,6 @@ ggsave(filename = "pca1.var1.PC7pos.jpg", plot = pca1.var1.PC7pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores8 <- as.data.frame(cbind(municipio = municipio, scores = var1_scores$PC8))
 plot.scores8$scores <- as.numeric(as.character(plot.scores8$scores))
 
@@ -1609,7 +1396,6 @@ ylim.sec <- c(-6, 6)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca1.var1.PC8pos <- ggplot() +
@@ -1641,16 +1427,7 @@ ggsave(filename = "pca1.var1.PC8pos.jpg", plot = pca1.var1.PC8pos, device = "jpg
 
 
 
-
-
-
-
-
-
-
-
-
-#CORRELATION MATRIX 2 - VARIABLE 1
+#CORRELATION MATRIX 2
 
 var1_cormat2 <- round(cor(var1_2),2)
 
