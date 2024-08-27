@@ -1,0 +1,51 @@
+#Universidade de Coimbra - master thesis - missing values
+
+
+library(base)
+
+
+
+
+#avoid scientific notation
+options(prompt="R> ", scipen=999)
+
+#set working directory
+setwd("C:/Users/Antonia/Desktop/Documents/R/master/")
+
+#load data
+variable1 <- read.csv("health determinants data.csv")
+municipio <- variable1$name
+
+#delete the first two columns ID and name
+variable1 <- variable1[,-1:-2]
+
+#substitute blanks with NA
+variable1[variable1 == ""] <- NA
+
+#see how many NA are in each variable / municipality in absolute numbers
+colSums(is.na(variable1)) #variable
+rowSums(is.na(variable1)) #municipality
+
+#calculate the percentage of missing values per per column (2) and row (1)
+pmiss <- function(x){sum(is.na(x))/length(x)*100}
+apply(variable1,2,pmiss) #variable
+apply(variable1,1,pmiss) #municipality
+
+#delete variables with more than 5 % missing values from variable 1 (n = 9))
+variable1 <- subset(variable1, select = -c(ncr.house,
+                                           r_edu_sec,
+                                           robb.cri,
+                                           thef.cri,
+                                           alco.cri,
+                                           stat.cri,
+                                           pets.cri,
+                                           legis.cri,
+                                           lice.cri))
+
+
+#for all other variables with missing values a single imputation method (here mean substitution) is applied
+
+#replace NA in all columns
+for(i in 1:ncol(variable1)) {
+  variable1[ , i][is.na(variable1[ , i])] <- mean(variable1[ , i], na.rm = TRUE)
+}
