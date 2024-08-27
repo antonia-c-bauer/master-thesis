@@ -277,7 +277,6 @@ var1_1 <- subset(variable1, select = -c(
 
 
 
-
 #GLOBAL PRINCIPAL COMPONENT ANALYSIS 1 - PCA 2
 
 #var1 = 81 because 63 were deleted
