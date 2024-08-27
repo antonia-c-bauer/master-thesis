@@ -33,7 +33,7 @@ https://github.com/antonia-c-bauer/master-thesis/blob/c1f6504550c63ff49fd5f785fb
 https://github.com/antonia-c-bauer/master-thesis/blob/f20b601105ce7dc122008acf6bea055b3058e4e5/B.4-code.missing.values.R
 
 ### B.4 - code.GPCA2
-
+https://github.com/antonia-c-bauer/master-thesis/blob/96c889f6e0a13aa0147f884b66479c7f792ffa66/B.4-code.GPCA2.R
 
 ### B.4 - code.HCA2
 
