@@ -125,7 +125,6 @@ ggsave(filename = "pca1.var1.mds.jpg", plot = pca1.var1.mds, device = "jpg", pat
 #CORRELATION MATRIX 1
 
 var1_cormat <- round(cor(variable1),2)
-help(round)
 
 #get lower triangle of the correlation matrix
 get_lower_tri1 <- function(var1_cormat){
