@@ -1,10 +1,11 @@
-#missing values
-
-
+#Universidade de Coimbra - master thesis - missing values
 
 
 library(base)
-    
+
+
+
+
 #avoid scientific notation
 options(prompt="R> ", scipen=999)
 
