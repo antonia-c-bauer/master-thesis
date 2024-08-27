@@ -1,9 +1,6 @@
-#Universidade de Coimbra - Masterarbeit - Geographically Weighted Principal Component Analysis
-#code for variable 2 = health outcomes
+#Universidade de Coimbra - master thesis - Principal Component Analysis 2
 
 
-R.Version()
-rversions::r_versions()
 library(base)
 library(tmap)
 library(GWmodel)      # GW models
@@ -30,15 +27,16 @@ library(psych)
 
 
 
-#avoid scientific notation (promt=Eingabeaufforderung =>??)
+
+#avoid
 options(prompt="R> ", scipen=999)
 
 
-#set working directory (=> wd) and load data
+#set working directory
 setwd("C:/Users/Antonia/Desktop/Documents/R/master/")
 
 
-#read the csv files
+#load data
 variable2 <- read.csv("health outcomes data CID R.csv")
 municipio <- variable2$name
 
