@@ -3,15 +3,15 @@
 
 library(base)
 library(tmap)
-library(GWmodel)      # GW models
-library(sp)           # Data management
-library(spdep)        # Spatial autocorrelation
-library(gstat)        # Geostatistics
-library(RColorBrewer) # Visualization
-library(classInt)     # Class intervals
-library(raster)       # spatial data
-library(gridExtra)    # Multiple plot
-library(ggplot2)      # Multiple plot
+library(GWmodel)      
+library(sp)           
+library(spdep)        
+library(gstat)        
+library(RColorBrewer) 
+library(classInt)     
+library(raster)       
+library(gridExtra)    
+library(ggplot2)      
 library(dplyr)
 library(sp)
 library(ggspatial)
@@ -43,79 +43,41 @@ municipio <- variable2$name
 
 
 
-
-
-
-#PREPARE DATA VARIABLE2
-
-#get the object class
-class(variable2)
-
-#get the object type
-typeof(variable2)
-
-#get the object structure
-str(variable2)
-
-#get the object attributes
-attributes(variable2)
-
-#get the dimensions of the object
-dim(variable2)
+#MISSING VALUES
 
 #delete the first two columns ID and name
 variable2 <- variable2[,-1:-2]
 
-#checking on missing values in var1
+#substitute blanks with NA
 variable2[variable2 == ""] <- NA
-#write.csv(variable2, "C:/Users/Antonia/Desktop/Documents/R/master/variable2_NA.csv", row.names=FALSE)
 
-#see how many NA in each variable / municipality
-colSums(is.na(variable2))
-rowSums(is.na(variable2))
+#see how many NA are in each variable / municipality in absolute numbers
+colSums(is.na(variable2)) #variable
+rowSums(is.na(variable2)) #municipality
 
 #calculate the percentage of missing values per per column (2) and row (1)
 pmiss <- function(x){sum(is.na(x))/length(x)*100}
-apply(variable2,2,pmiss)
-apply(variable2,1,pmiss)
+apply(variable2,2,pmiss) #variable
+apply(variable2,1,pmiss) #municipality
 
-
-#this calculation was to test if acid.pop and acid.new.pop have any different results
-#but since the variable has more than 5% missing values in both cases
-#it was deleted in the very first step and has no effect on the rest of analysis
-
-
-#delete variables with more than 5 % missing values from variable2 (n=9)
+#delete variables with more than 5 % missing values from variable 2 (n = 9)
 variable2 <- subset(variable2, select = -c(tumcol.pop,
-                                           tumpro.pop,
-                                           tumtec.pop,
-                                           pneu.pop,
-                                           cron.pop,
-                                           geni.pop,
-                                           rimur.pop,
-                                           peri.pop,
-                                           acid.pop
-))
+tumpro.pop,
+tumtec.pop,
+pneu.pop,
+cron.pop,
+geni.pop,
+rimur.pop,
+peri.pop,
+acid.pop))
 
-
-#single imputation method => mean substitution
-
-#replace NA in single columns => https://statisticsglobe.com/replace-missing-values-by-column-mean-in-r
-#variable1$i_gini_inco[is.na(variable1$i_gini_inco)] <- mean(variable1$i_gini_inco)
-#variable1$inju.cri[is.na(variable1$inju.cri)] <- mean(variable1$inju.cri)
-#variable1$vio.cri[is.na(variable1$vio.cri)] <- mean(variable1$vio.cri)
-#variable1$soci.cri[is.na(variable1$soci.cri)] <- mean(variable1$soci.cri)
-
-#replace NA in all columns => https://statisticsglobe.com/replace-missing-values-by-column-mean-in-r
+  
+#for all other variables with missing values a single imputation method (here mean substitution) is applied
+  
+#replace NA in all columns
 for(i in 1:ncol(variable2)) {
-  variable2[ , i][is.na(variable2[ , i])] <- mean(variable2[ , i], na.rm = TRUE)
+variable2[ , i][is.na(variable2[ , i])] <- mean(variable2[ , i], na.rm = TRUE)
 }
-
-#other option to deal with NA values
-#data <- replace(data, is.na(data), 0)
-
-write.csv(variable2, "C:/Users/Antonia/Desktop/Documents/R/master/variable2_NArm_CID.csv", row.names=FALSE)
-
 
 
 
@@ -125,29 +87,13 @@ variable2 <- as.data.frame(scale(variable2))
 
 
 
-
-#check on outliers
+#MULTIDIMENSIONAL SCALING
 
 distance <- dist(variable2) 
 mds_var2<-cmdscale(distance, k=2)
 
-#jpeg(filename = "C:/Users/Antonia/Desktop/Documents/R/master/plots/mds2.jpeg", width = 2000, height = 2000, units = "px", res = 300)
-plot(mds_var2, type='n',
-     xlab = "Dimension 1",
-     ylab = "Dimension 2",
-     main = "Multidimensional Scaling")
-text(mds_var2, labels=municipio, cex=0.6, adj=0.5)
-grid(nx = NULL, ny = NULL,
-     lty = 1,      # Grid line type
-     col = "gray", # Grid line color
-     lwd = 0.25)      # Grid line width
-#dev.off()
-
-
 mds_var2 <- as.data.frame(mds_var2)
 mds_var2 <- bind_cols(Municipio=municipio, mds_var2)
-
-
 
 
 pca2.var2.mds <- 
@@ -176,13 +122,8 @@ ggsave(filename = "pca2.var2.mds.jpg", plot = pca2.var2.mds, device = "jpg", pat
 
 
 
+#CORRELATION MATRIX 1
 
-
-
-
-
-
-#VARIABLE 2 - CORRELATION MATRIX 1
 var2_cormat1 <- round(cor(variable2),2)
 
 #get lower triangle of the correlation matrix
@@ -248,8 +189,10 @@ write.csv(var2_cormat1, "C:/Users/Antonia/Desktop/Documents/R/master/var2_cormat
 
 
 
-#VARIABLE 2 - PCA 1
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 2 - PCA 1
+
 #var2 n = 62
+
 var2_pca1 <- pca(r = variable2, nfactors = 62, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
 summary(var2_pca1)
 
@@ -263,12 +206,9 @@ print(var2_pca1_eig1)
 write.csv(var2_pca1_load1, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca1_load1_CID.csv")
 
 
-
-
-
 #variables with eigenvalue >=1 are n=24
-#in EXCEL only keep variables that in all first 24 components provide loadings between than 0.5 (-0.5) and 10 (-10) 
-#delete variables with loadings below 0.5 (-0.5) (n=39)
+#delete variables that in all first 24 components provide loadings between x[-0.5;0.5] (n = 39)
+
 var2_1 <- subset(variable2, select = -c(
   par.pop,
   dip.pop,
@@ -314,8 +254,10 @@ var2_1 <- subset(variable2, select = -c(
 
 
 
-#VARIABLE 2 - PCA 2
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 2 - PCA 2
+
 #var2 n = 23
+
 var2_pca2 <- pca(r = var2_1, nfactors = 23, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
 summary(var2_pca2)
 
@@ -329,12 +271,9 @@ print(var2_pca2_eig2)
 write.csv(var2_pca2_load2, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca2_load2_CID.csv")
 
 
-
-
-
 #variables with eigenvalue >=1 are n=6
-#in EXCEL delete variables that in all first 6 components provide loadings between 0.5 (-0.5) and 10 (-10)
-#delete variables with loadings below 0.5 (-0.5) (n=1)
+#delete variables that in all first 6 components provide loadings between x[-0.5;0.5] (n = 1)
+
 var2_2 <- subset(var2_1, select = -c(
   tumest.pop
 ))
@@ -342,11 +281,10 @@ var2_2 <- subset(var2_1, select = -c(
 
 
 
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 2 - PCA 3
 
-
-
-#VARIABLE 2 - PCA 3
 #var2 n = 22
+
 var2_pca3 <- pca(r = var2_2, nfactors = 22, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
 summary(var2_pca3)
 
@@ -360,13 +298,9 @@ print(var2_pca3_eig3)
 write.csv(var2_pca3_load3, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca3_load3_CID.csv")
 
 
+#variables with eigenvalue >=1 are n=6
+#delete variables that in all first 6 components provide loadings between x[-0.5;0.5] (n = 1)
 
-
-
-
-#variables with eigenvalue >=1 are n=5
-#in EXCEL delete variables that in all first 5 components provide loadings between 0.5 (-0.5) and 10 (-10)
-#delete variables with loadings below 0.5 (-0.5) (n=1)
 var2_3 <- subset(var2_2, select = -c(
   hv.pop
 ))
@@ -374,15 +308,12 @@ var2_3 <- subset(var2_2, select = -c(
 
 
 
+#GLOBAL PRINCIPAL COMPONENT ANALYSIS 2 - PCA 4
 
-
-
-#VARIABLE 2 - PCA 4
 #var2 n = 21
 
 var2_pca4 <- pca(r = var2_3, nfactors = 21, residuals = FALSE, rotate = "none", n.obs = 278, covar = FALSE, scores = TRUE, oblique.scores = FALSE, cor = "cor")
 print.psych(var2_pca4)
-
 
 #get the loadings
 var2_pca4_load4 <- var2_pca4$loadings
@@ -390,40 +321,35 @@ print(var2_pca4_load4)
 
 var2_pca4_load4 <- as.data.frame(var2_pca4_load4[1:21,1:21])
 
-
 #get the quality of representation (cos2)
 cos2 <- as.data.frame(var2_pca4_load4^2)
-
 
 #get the communalities
 communalities <- as.data.frame(rowSums(cos2[1:21,1:6]))
 
-
 #see proportion of total variance explained per PC
 prop.table(var2_pca4$values)
-
 
 #get eigenvalues
 var2_pca4_eig4 <- var2_pca4$values
 
-
-#vertausche Spalten und Zeilen and create seperate dataframe
+#interchange columns and rows and create seperate dataframe
 eig4.df <- data.frame(t(var2_pca4_eig4))
-
 
 #copy column values 21 times
 eig4.copy <- data.frame(eig4.df[,1:21], ntimes=c(21))
 eig4.copy <- as.data.frame(lapply(eig4.copy, rep, eig4.copy$ntimes))
 eig4.copy <- eig4.copy[,-22]
 
-
 #get the contribution of the variables
 contribution <- as.data.frame(((var2_pca4_load4^2)/eig4.copy)*100)
 
-
-
 var2_pca4_eig4 <- as.data.frame(var2_pca4_eig4[1:10])
 print(var2_pca4_eig4)
+
+
+#data preparation screeplot
+var2_pca4_eig4 <- data.frame(comp10 = paste(c("PC"),c(1:10), sep = ""), value = round(var2_pca4_eig4[,1],1))
 
 
 var2_scores <- var2_pca4$scores[,1:6]
@@ -433,10 +359,8 @@ var2_scores <- as.data.frame(var2_scores)
 write.csv(var2_pca4_load4, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca4_load4_CID.csv")
 write.csv(cos2, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca4_cos2.csv")
 write.csv(communalities, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca4_communalities.csv")
-
 write.csv(contribution, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_pca4_contribution.csv")
 write.csv(var2_scores, file = "C:/Users/Antonia/Desktop/Documents/R/master/var2_scores_CID.csv")
-
 
 
 
@@ -463,14 +387,6 @@ print(pca2.var2.biplot)
 ggsave(filename = "pca2.var2.biplot.jpg", plot = pca2.var2.biplot, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 20, height = 20, units = "cm", dpi = 300)
 
 
-
-
-
-
-
-
-#data preparation screeplot
-var2_pca4_eig4 <- data.frame(comp10 = paste(c("PC"),c(1:10), sep = ""), value = round(var2_pca4_eig4[,1],1))
 
 
 #SCREEPLOT (EIGENVALUES) PCA 4
@@ -500,7 +416,6 @@ ggsave(filename = "pca2.var2.screeplot.jpg", plot = pca2.var2.screeplot, device 
 
 
 
-
 variance <- data.frame(
   comp5 = c("PC1","PC2","PC3","PC4","PC5","PC6"),
   PTV = round(c(0.336, 0.101, 0.064, 0.053, 0.052, 0.048)*100,1),
@@ -511,6 +426,7 @@ variance <- data.frame(
 
 
 #BARPLOT PVT PCA 4
+
 pca2.var2.PTV <- ggplot(variance, aes(x = comp5, y = PTV, fill = PTV)) +
   geom_bar(stat = "identity", width = 0.9) +
   scale_fill_steps(high = "#4D868E", low = "#4D868E") +
@@ -530,10 +446,6 @@ pca2.var2.PTV <- ggplot(variance, aes(x = comp5, y = PTV, fill = PTV)) +
 print(pca2.var2.PTV)
 
 ggsave(filename = "pca2.var2.PTV.jpg", plot = pca2.var2.PTV, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
-
-
-
-
 
 
 
@@ -561,12 +473,7 @@ ggsave(filename = "pca2.var2.CPTV.jpg", plot = pca2.var2.CPTV, device = "jpg", p
 
 
 
-
-
-
-
-
-#plot variables' communalities PC1-PC6
+#BARPLOT COMMUNALITIES PC1-PC6
 
 pca2.var2.communalities <- ggplot(communalities, aes(x = reorder(rownames(communalities), -rowSums(cos2[1:21,1:6])), y = rowSums(cos2[1:21,1:6]), fill = rowSums(cos2[1:21,1:6]), group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -589,12 +496,6 @@ print(pca2.var2.communalities)
 ggsave(filename = "pca2.var2.communalities.jpg", plot = pca2.var2.communalities, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
 
 
-
-
-
-
-
-#plot contributions
 
 
 PC1.contribution <- as.data.frame(cbind(var2names = row.names(contribution), PC1cont = contribution$PC1))
@@ -629,9 +530,7 @@ str(PC6.contribution)
 
 
 
-
-
-#variable contribution PC1
+#PLOT VARIABLE CONTRIBUTION PC1
 
 pca2.var2.PC1cont <- ggplot(PC1.contribution, aes(x = reorder(var2names, -PC1cont), y = PC1cont, fill = PC1cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -656,8 +555,7 @@ ggsave(filename = "pca2.var2.PC1cont.jpg", plot = pca2.var2.PC1cont, device = "j
 
 
 
-
-#variable contribution PC2
+#PLOT VARIABLE CONTRIBUTION PC2
 
 pca2.var2.PC2cont <- ggplot(PC2.contribution, aes(x = reorder(var2names, -PC2cont), y = PC2cont, fill = PC2cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -682,8 +580,7 @@ ggsave(filename = "pca2.var2.PC2cont.jpg", plot = pca2.var2.PC2cont, device = "j
 
 
 
-
-#variable contribution PC3
+#PLOT VARIABLE CONTRIBUTION PC3
 
 pca2.var2.PC3cont <- ggplot(PC3.contribution, aes(x = reorder(var2names, -PC3cont), y = PC3cont, fill = PC3cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -708,8 +605,7 @@ ggsave(filename = "pca2.var2.PC3cont.jpg", plot = pca2.var2.PC3cont, device = "j
 
 
 
-
-#variable contribution PC4
+#PLOT VARIABLE CONTRIBUTION PC4
 
 pca2.var2.PC4cont <- ggplot(PC4.contribution, aes(x = reorder(var2names, -PC4cont), y = PC4cont, fill = PC4cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -734,8 +630,7 @@ ggsave(filename = "pca2.var2.PC4cont.jpg", plot = pca2.var2.PC4cont, device = "j
 
 
 
-
-#variable contribution PC5
+#PLOT VARIABLE CONTRIBUTION PC5
 
 pca2.var2.PC5cont <- ggplot(PC5.contribution, aes(x = reorder(var2names, -PC5cont), y = PC5cont, fill = PC5cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -760,8 +655,7 @@ ggsave(filename = "pca2.var2.PC5cont.jpg", plot = pca2.var2.PC5cont, device = "j
 
 
 
-
-#variable contribution PC6
+#PLOT VARIABLE CONTRIBUTION PC6
 
 pca2.var2.PC6cont <- ggplot(PC6.contribution, aes(x = reorder(var2names, -PC6cont), y = PC6cont, fill = PC6cont, group = 1)) +
   geom_bar(stat = "identity", width = 0.9) +
@@ -782,24 +676,6 @@ pca2.var2.PC6cont <- ggplot(PC6.contribution, aes(x = reorder(var2names, -PC6con
 print(pca2.var2.PC6cont)
 
 ggsave(filename = "pca2.var2.PC6cont.jpg", plot = pca2.var2.PC6cont, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 30, height = 15, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -828,12 +704,8 @@ pca4.sfdata <- merge(shp_muni,var2_scores, by="Municipio")
 
 
 
-#explain scores
-#https://www.mun.ca/biology/scarr/2900_PCA_Analysis.htm#:~:text=The%20%27score%27%20of%20each%20individual,axes%20that%20can%20be%20graphed.
+#PLOT SCORE MAP PC1
 
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca2.var2.PC1score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca4.sfdata, aes(fill = PC1)) +
@@ -870,9 +742,8 @@ ggsave(filename = "pca2.var2.PC1score.jpg", plot = pca2.var2.PC1score, device = 
 
 
 
+#PLOT SCORE MAP PC2
 
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca2.var2.PC2score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca4.sfdata, aes(fill = PC2)) +
@@ -909,10 +780,8 @@ ggsave(filename = "pca2.var2.PC2score.jpg", plot = pca2.var2.PC2score, device = 
 
 
 
+#PLOT SCORE MAP PC3
 
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca2.var2.PC3score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca4.sfdata, aes(fill = PC3)) +
@@ -949,11 +818,8 @@ ggsave(filename = "pca2.var2.PC3score.jpg", plot = pca2.var2.PC3score, device = 
 
 
 
+#PLOT SCORE MAP PC4
 
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca2.var2.PC4score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca4.sfdata, aes(fill = PC4)) +
@@ -990,11 +856,8 @@ ggsave(filename = "pca2.var2.PC4score.jpg", plot = pca2.var2.PC4score, device = 
 
 
 
+#PLOT SCORE MAP PC5
 
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca2.var2.PC5score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca4.sfdata, aes(fill = PC5)) +
@@ -1031,13 +894,8 @@ ggsave(filename = "pca2.var2.PC5score.jpg", plot = pca2.var2.PC5score, device = 
 
 
 
+#PLOT SCORE MAP PC6
 
-
-
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
 pca2.var2.PC6score <- ggplot(data = shp_muni) +
   geom_sf(color = "black", fill = "grey") +
   geom_sf(data = pca4.sfdata, aes(fill = PC6)) +
@@ -1074,11 +932,7 @@ ggsave(filename = "pca2.var2.PC6score.jpg", plot = pca2.var2.PC6score, device = 
 
 
 
-
-
-
-
-#plot loading and score positions
+#PLOT LOADING AND SCORE POSITIONS
 
 plot.scores1 <- as.data.frame(cbind(municipio = municipio, scores = var2_scores$PC1))
 plot.scores1$scores <- as.numeric(as.character(plot.scores1$scores))
@@ -1088,7 +942,6 @@ ylim.sec <- c(-5, 5)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca2.var2.PC1pos <- ggplot() +
@@ -1120,10 +973,6 @@ ggsave(filename = "pca2.var2.PC1pos.jpg", plot = pca2.var2.PC1pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores2 <- as.data.frame(cbind(municipio = municipio, scores = var2_scores$PC2))
 plot.scores2$scores <- as.numeric(as.character(plot.scores2$scores))
 
@@ -1132,7 +981,6 @@ ylim.sec <- c(-6, 6)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca2.var2.PC2pos <- ggplot() +
@@ -1164,10 +1012,6 @@ ggsave(filename = "pca2.var2.PC2pos.jpg", plot = pca2.var2.PC2pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores3 <- as.data.frame(cbind(municipio = municipio, scores = var2_scores$PC3))
 plot.scores3$scores <- as.numeric(as.character(plot.scores3$scores))
 
@@ -1176,7 +1020,6 @@ ylim.sec <- c(-6, 6)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca2.var2.PC3pos <- ggplot() +
@@ -1208,11 +1051,6 @@ ggsave(filename = "pca2.var2.PC3pos.jpg", plot = pca2.var2.PC3pos, device = "jpg
 
 
 
-
-
-
-
-
 plot.scores4 <- as.data.frame(cbind(municipio = municipio, scores = var2_scores$PC4))
 plot.scores4$scores <- as.numeric(as.character(plot.scores4$scores))
 
@@ -1221,7 +1059,6 @@ ylim.sec <- c(-10, 10)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca2.var2.PC4pos <- ggplot() +
@@ -1253,10 +1090,6 @@ ggsave(filename = "pca2.var2.PC4pos.jpg", plot = pca2.var2.PC4pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores5 <- as.data.frame(cbind(municipio = municipio, scores = var2_scores$PC5))
 plot.scores5$scores <- as.numeric(as.character(plot.scores5$scores))
 
@@ -1265,7 +1098,6 @@ ylim.sec <- c(-6, 6)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca2.var2.PC5pos <- ggplot() +
@@ -1297,10 +1129,6 @@ ggsave(filename = "pca2.var2.PC5pos.jpg", plot = pca2.var2.PC5pos, device = "jpg
 
 
 
-
-
-
-
 plot.scores6 <- as.data.frame(cbind(municipio = municipio, scores = var2_scores$PC6))
 plot.scores6$scores <- as.numeric(as.character(plot.scores6$scores))
 
@@ -1309,7 +1137,6 @@ ylim.sec <- c(-18, 18)    # in this example, Scores
 
 b <- diff(ylim.prim)/diff(ylim.sec)
 a <- ylim.prim[1] - b*ylim.sec[1]
-
 
 
 pca2.var2.PC6pos <- ggplot() +
@@ -1341,16 +1168,7 @@ ggsave(filename = "pca2.var2.PC6pos.jpg", plot = pca2.var2.PC6pos, device = "jpg
 
 
 
-
-
-
-
-
-
-
-
-
-#VARIABLE 2 - CORRELATION MATRIX 2
+#CORRELATION MATRIX 2
 
 var2_cormat2 <- round(cor(var2_3),2)
 
@@ -1412,860 +1230,3 @@ print(pca2.var2.cormat2)
 ggsave(filename = "pca2.var2.cormat2.jpg", plot = pca2.var2.cormat2, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 26, units = "cm", dpi = 300)
 
 write.csv(var2_cormat2, "C:/Users/Antonia/Desktop/Documents/R/master/var2_cormat2.csv", row.names=TRUE)
-
-
-
-
-
-
-
-
-#############################################################################################
-
-
-
-
-
-
-
-#CALCULATE SCALED VARIABLE 2 FOR GWPCA
-
-#calculate score for every raw data value in every column of a dataframe using the sapply() function
-#https://www.statology.org/z-score-r/
-
-#calculate the distance from the mean [optional]
-#var1_mean <- sapply(variable1, function(variable1) (variable1-mean(variable1)))
-
-#calculate the standard deviation [optional]
-#var1_sd <- sapply(variable1, function(variable1) (sd(variable1)))
-
-#standardize
-var2_scaled <- sapply(var2_3, function(var2_3) (var2_3-mean(var2_3))/sd(var2_3))
-
-var2_scaled <- as.data.frame(var2_scaled)
-
-str(var2_scaled)
-
-#save output as new csv file
-#write.csv(var2_scaled, "C:/Users/Antonia/Desktop/Documents/R/master/var2_scaled.csv", row.names=FALSE)
-
-
-
-
-
-
-
-
-#bind with municipality names
-var2_scaled <- bind_cols(Municipio=municipio, var2_scaled)
-
-
-
-
-
-
-
-
-#search for shapefiles
-list.files(pattern = ".shp", full.names = T)
-
-#read shapefiles
-shp_muni <- read_sf("Cont_Mun_CAOP2023.shp")
-
-#delete non useful columns
-shp_muni <- shp_muni[,c(-1:-2,-4:-12)]
-
-
-#data2 = standardized variables of health outcomes merged with shape file
-
-#merge scaled variable data frame with shapefile
-data2 <- merge(shp_muni,var2_scaled, by="Municipio")
-
-#delete first row, which is of type "character"
-data2 <- data2[,-1]
-str(data2)
-
-
-
-
-
-
-
-
-#GEOGRAPHICALLY WEIGHTED PRINCIPAL COMPONENT ANALYSIS FOR HEALTH OUTCOMES
-
-#get coordinates for gwpca
-coords <- st_coordinates(st_geometry(st_centroid(shp_muni)))
-
-
-#find columns with constant variables
-#const <- names(var1_zscore[, sapply(var1_zscore, function(v) var(v, na.rm=TRUE)==0)])
-
-
-#returns dataframe without constant variables (n=13)
-#var1_zscore <- var1_zscore %>% select_if(function(v) var(v, na.rm=TRUE) != 0)
-
-
-#delete first row, which is of type "character"
-var2_scaled <- var2_scaled[,-1]
-
-
-#create SpatialPointsDataFrame
-data2.spdf <- SpatialPointsDataFrame(coords, as.data.frame(var2_scaled), match.ID = TRUE)
-
-
-#bandwidth selection for geographically weighted principal components analysis (GWPCA)
-bw.gw.pca2 <- bw.gwpca(data2.spdf,
-                       vars = colnames(data2.spdf@data),
-                       k = 5,
-                       robust = FALSE,
-                       kernel = "bisquare",
-                       adaptive = TRUE)
-
-
-
-
-
-
-
-
-#geographically weighted principal component analysis
-gw.pca2 <- gwpca(data2.spdf, 
-                 vars = colnames(data2.spdf@data), 
-                 bw=bw.gw.pca2,
-                 k = 5, 
-                 robust = FALSE, 
-                 adaptive = TRUE,
-                 cv = TRUE,
-                 scores = TRUE)
-
-
-
-
-
-
-
-
-
-
-
-#plot local proportion of variation explained by PC1
-gwpca2.PTVpc1 <- gw.pca2$SDF$Comp.1_PV
-
-data2$gwpca2.PTVpc1 <- gwpca2.PTVpc1
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.PTVpc1 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.PTVpc1)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local PTV explained by PC1") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.PTVpc1.jpg", plot = plot.gwpca2.PTVpc1, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#plot local proportion of variation explained by PC2
-gwpca2.PTVpc2 <- gw.pca2$SDF$Comp.2_PV
-
-data2$gwpca2.PTVpc2 <- gwpca2.PTVpc2
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.PTVpc2 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.PTVpc2)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local PTV explained by PC2") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.PTVpc2.jpg", plot = plot.gwpca2.PTVpc2, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#plot local proportion of variation explained by PC3
-gwpca2.PTVpc3 <- gw.pca2$SDF$Comp.3_PV
-
-data2$gwpca2.PTVpc3 <- gwpca2.PTVpc3
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.PTVpc3 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.PTVpc3)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local PTV explained by PC3") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.PTVpc3.jpg", plot = plot.gwpca2.PTVpc3, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#plot local proportion of variation explained by PC4
-gwpca2.PTVpc4 <- gw.pca2$SDF$Comp.4_PV
-
-data2$gwpca2.PTVpc4 <- gwpca2.PTVpc4
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.PTVpc4 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.PTVpc4)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local PTV explained by PC4") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.PTVpc4.jpg", plot = plot.gwpca2.PTVpc4, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#plot local proportion of variation explained by PC5
-gwpca2.PTVpc5 <- gw.pca2$SDF$Comp.5_PV
-
-data2$gwpca2.PTVpc5 <- gwpca2.PTVpc5
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.PTVpc5 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.PTVpc5)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local PTV explained by PC5") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.PTVpc5.jpg", plot = plot.gwpca2.PTVpc5, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-#plot local proportion of variation explained by all 6 PCs
-gwpca2.PTVpc_all <- gw.pca2$SDF$local_CP
-
-data2$gwpca2.PTVpc_all <- gwpca2.PTVpc_all
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.PTVpc_all <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.PTVpc_all)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local CPTV explained by PC 1 to 5") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.PTVpc_all.jpg", plot = plot.gwpca2.PTVpc_all, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
-#GWPCA cumulative proportion of total variation (CPTV) explained
-prop.var <- function(gwpca.obj, n.components) {return((rowSums(gwpca.obj$var[, 1:n.components]) /rowSums(gwpca.obj$var)) * 100)}
-
-
-
-#Local Variation explained by 2 components
-gwpca2.CPTVpc1_2 <- prop.var(gw.pca2, 2)
-
-data2$gwpca2.CPTVpc1_2 <- gwpca2.CPTVpc1_2
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.CPTVpc1_2 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.CPTVpc1_2)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local CPTV explained by PC 1 to 2") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.CPTVpc1_2.jpg", plot = plot.gwpca2.CPTVpc1_2, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#Local Variation explained by 3 components
-gwpca2.CPTVpc1_3 <- prop.var(gw.pca2, 3)
-
-data2$gwpca2.CPTVpc1_3 <- gwpca2.CPTVpc1_3
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.CPTVpc1_3 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.CPTVpc1_3)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local CPTV explained by PC 1 to 3") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.CPTVpc1_3.jpg", plot = plot.gwpca2.CPTVpc1_3, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#Local Variation explained by 4 components
-gwpca2.CPTVpc1_4 <- prop.var(gw.pca2, 4)
-
-data2$gwpca2.CPTVpc1_4 <- gwpca2.CPTVpc1_4
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.CPTVpc1_4 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.CPTVpc1_4)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local CPTV explained by PC 1 to 4") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.CPTVpc1_4.jpg", plot = plot.gwpca2.CPTVpc1_4, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#Local Variation explained by 5 components
-gwpca2.CPTVpc1_5 <- prop.var(gw.pca2, 5)
-
-data2$gwpca2.CPTVpc1_5 <- gwpca2.CPTVpc1_5
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.CPTVpc1_5 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.CPTVpc1_5)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Local CPTV explained by PC 1 to 5") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Variation in %") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2.CPTVpc1_5.jpg", plot = plot.gwpca2.CPTVpc1_5, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
-
-
-gwpca2.loadings1 <- gw.pca2$loadings[, , 1]
-gwpca2.maxload = max.col(abs(gwpca2.loadings1)) #with the abs() function returning the absolute value |x| without regarding its postive or negative sign
-data2$gwpca2.maxload <- gwpca2.maxload
-
-
-
-#plot map
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.win <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2.maxload)) +
-  scale_fill_steps(low = "#ffffff", high = "#53247F") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Loadings of leading variables on PC 1") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Loading") +
-  theme(legend.position="bottom", legend.key.width = unit(2.5, "cm")) +
-  guides(fill = guide_colourbar(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2_win.jpg", plot = plot.gwpca2.win, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
-#LEADING VARIABLEs loadings on first component
-gwpca2.loadings1 <- gw.pca2$loadings[, , 1]
-gwpca2_lead.item1 <- colnames(gwpca2.loadings1)[max.col(abs(gwpca2.loadings1))]
-data2$gwpca2_lead.item1 <- gwpca2_lead.item1
-
-
-#qtm(shp_muni) + 
-#  tm_shape(data2) + 
-#  tm_fill(col='gwpca2_lead.item1',title='Lead PC',size=0.08) +
-#  tm_compass()  
-
-
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.li1 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2_lead.item1)) +
-  scale_fill_brewer(palette = "Set3") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Leading Variables of PC1") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Leading Variable") +
-  theme(legend.position="right", legend.key.width = unit(1, "cm")) +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2_lead.item1.jpg", plot = plot.gwpca2.li1, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
-#LEADING VARIABLE loadings on second component
-gwpca2.loadings2 <- gw.pca2$loadings[, , 2]
-gwpca2_lead.item2 <- colnames(gwpca2.loadings2)[max.col(abs(gwpca2.loadings2))]
-data2$gwpca2_lead.item2 <- gwpca2_lead.item2
-
-
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.li2 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2_lead.item2)) +
-  scale_fill_brewer(palette = "Set3") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Leading Variables of PC2") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Leading Variable") +
-  theme(legend.position="right", legend.key.width = unit(1, "cm")) +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2_lead.item2.jpg", plot = plot.gwpca2.li2, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
-
-
-
-#LEADING VARIABLE loadings on third component
-gwpca2.loadings3 <- gw.pca2$loadings[, , 3]
-gwpca2_lead.item3 <- colnames(gwpca2.loadings3)[max.col(abs(gwpca2.loadings3))]
-data2$gwpca2_lead.item3 <- gwpca2_lead.item3
-
-
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.li3 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2_lead.item3)) +
-  scale_fill_brewer(palette = "Set3") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Leading Variables of PC3") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Leading Variable") +
-  theme(legend.position="right", legend.key.width = unit(1, "cm")) +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2_lead.item3.jpg", plot = plot.gwpca2.li3, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#LEADING VARIABLE loadings on 4th component
-gwpca2.loadings4 <- gw.pca2$loadings[, , 4]
-gwpca2_lead.item4 <- colnames(gwpca2.loadings4)[max.col(abs(gwpca2.loadings4))]
-data2$gwpca2_lead.item4 <- gwpca2_lead.item4
-
-
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.li4 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2_lead.item4)) +
-  scale_fill_brewer(palette = "Set3") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Leading Variables of PC4") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Leading Variable") +
-  theme(legend.position="right", legend.key.width = unit(1, "cm")) +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2_lead.item4.jpg", plot = plot.gwpca2.li4, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-#LEADING VARIABLE loadings on 5th component
-gwpca2.loadings5 <- gw.pca2$loadings[, , 5] 
-gwpca2_lead.item5 <- colnames(gwpca2.loadings5)[max.col(abs(gwpca2.loadings5))]
-data2$gwpca2_lead.item5 <- gwpca2_lead.item5
-
-
-#map shapefile, save as A4 portrait pdf
-plot.gwpca2.li5 <- ggplot(data = shp_muni) +
-  geom_sf(color = "black", fill = "grey") +
-  geom_sf(data = data2, aes(fill = gwpca2_lead.item5)) +
-  scale_fill_brewer(palette = "Set3") +
-  theme_bw() +
-  theme(axis.title.x=element_blank(),
-        axis.text.x=element_blank(),
-        axis.ticks.x=element_blank()) +
-  theme(axis.title.y=element_blank(),
-        axis.text.y=element_blank(),
-        axis.ticks.y=element_blank()) +
-  theme(text = element_text(size = 20)) +
-  ggtitle("Leading Variables of PC5") +
-  theme(plot.title = element_text(hjust=0.5)) +
-  labs(fill="Leading Variable") +
-  theme(legend.position="right", legend.key.width = unit(1, "cm")) +
-  guides(fill = guide_legend(title.position = "top", title.hjust = 0.5)) +
-  ggspatial::annotation_scale(
-    location = "br",
-    bar_cols = c("grey", "white"),
-    height = unit(0.5, "cm"),
-    text_cex = 1.5) +
-  ggspatial::annotation_north_arrow(
-    location = "tr", which_north = "true",
-    style = ggspatial::north_arrow_fancy_orienteering(
-      fill = c("grey", "grey"),
-      line_col = "grey20"),
-    height = unit(2, "cm"),
-    width = unit(2, "cm")) 
-
-ggsave(filename = "gwpca2_lead.item5.jpg", plot = plot.gwpca2.li5, device = "jpg", path = "C:/Users/Antonia/Desktop/Documents/R/master/plots/", width = 21, height = 29.7, units = "cm", dpi = 300)
-
-
-
-
-
