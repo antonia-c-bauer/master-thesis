@@ -13,7 +13,7 @@ table of content
 ## A.4 - code.material
 
 ### A.4 - code.missing.values
-https://github.com/antonia-c-bauer/master-thesis/blob/c1f6504550c63ff49fd5f785fb4dc371cad65e28/A.4-code.GPCA1.R
+https://github.com/antonia-c-bauer/master-thesis/blob/c1f6504550c63ff49fd5f785fb4dc371cad65e28/A.4-code.missing.values.R
 
 ### A.4 - code.GPCA1
 https://github.com/antonia-c-bauer/master-thesis/blob/c1f6504550c63ff49fd5f785fb4dc371cad65e28/A.4-code.GPCA1.R
