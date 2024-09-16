@@ -50,6 +50,9 @@ https://github.com/antonia-c-bauer/master-thesis/blob/1fad89671b23ac6d04e705055e
 ### C.4 - code.HCA3
 https://github.com/antonia-c-bauer/master-thesis/blob/bcb6305815683bdf72a34e7a86110810a9ce0f1f/C.4-code.HCA3.R
 
+### B.4 - code.OLS1_GWR1
+https://github.com/antonia-c-bauer/master-thesis/blob/0a5089c85ad3e71ffacd686c3cfd1c1e8957aa2d/C4.code-OLS1_GWR1.R
+
 ---
 
 
