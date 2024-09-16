@@ -3,9 +3,11 @@
 ## Multidimensional Contexts of Health
 ### A holistic approach to spatial analysis of clusters of health outcomes and health determinants in Portugal
 
+
 table of content
 
 ---
+
 
 # A - appendix
 
@@ -24,6 +26,7 @@ https://github.com/antonia-c-bauer/master-thesis/blob/ea5c60176d10513a0eba2a7ad7
 
 ---
 
+
 # B - appendix
 
 ## B.2 - data
@@ -41,8 +44,13 @@ https://github.com/antonia-c-bauer/master-thesis/blob/1fad89671b23ac6d04e705055e
 
 ---
 
+
 # C - appendix
 
+### C.4 - code.HCA3
+https://github.com/antonia-c-bauer/master-thesis/blob/bcb6305815683bdf72a34e7a86110810a9ce0f1f/C.4-code.HCA3.R
+
 ---
+
 
 # D - appendix
