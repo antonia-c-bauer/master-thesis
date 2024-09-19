@@ -48,7 +48,7 @@ https://github.com/antonia-c-bauer/master-thesis/blob/b5ccb9dd36dc2447568a77093b
 # C - appendix
 
 ### C.4 - code.HCA3
-
+https://github.com/antonia-c-bauer/master-thesis/blob/fd1567f102f3c9f50038b9a160f54eb3e84bee0c/C.4-code.HCA3.R
 
 ### B.4 - code.OLS1_GWR1
 
