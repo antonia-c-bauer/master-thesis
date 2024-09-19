@@ -22,7 +22,7 @@ https://github.com/antonia-c-bauer/master-thesis/blob/c1f6504550c63ff49fd5f785fb
 https://github.com/antonia-c-bauer/master-thesis/blob/c1f6504550c63ff49fd5f785fb4dc371cad65e28/A.4-code.GPCA1.R
 
 ### A.4 - code.HCA1
-https://github.com/antonia-c-bauer/master-thesis/blob/ea5c60176d10513a0eba2a7ad7b0df9f25b56669/A.4-code.HCA1.R
+https://github.com/antonia-c-bauer/master-thesis/blob/08211d522dcc961fd295bfc19872148cdc677266/A.4-code.HCA1.R
 
 ---
 
