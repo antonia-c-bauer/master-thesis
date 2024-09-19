@@ -40,7 +40,7 @@ https://github.com/antonia-c-bauer/master-thesis/blob/f20b601105ce7dc122008acf6b
 https://github.com/antonia-c-bauer/master-thesis/blob/96c889f6e0a13aa0147f884b66479c7f792ffa66/B.4-code.GPCA2.R
 
 ### B.4 - code.HCA2
-https://github.com/antonia-c-bauer/master-thesis/blob/1fad89671b23ac6d04e705055ef2c546f87d5fb9/B.4-code.HCA2.R
+https://github.com/antonia-c-bauer/master-thesis/blob/b5ccb9dd36dc2447568a77093b92b665bdd84b7f/B.4-code.HCA2.R
 
 ---
 
@@ -48,10 +48,10 @@ https://github.com/antonia-c-bauer/master-thesis/blob/1fad89671b23ac6d04e705055e
 # C - appendix
 
 ### C.4 - code.HCA3
-https://github.com/antonia-c-bauer/master-thesis/blob/bcb6305815683bdf72a34e7a86110810a9ce0f1f/C.4-code.HCA3.R
+
 
 ### B.4 - code.OLS1_GWR1
-https://github.com/antonia-c-bauer/master-thesis/blob/0a5089c85ad3e71ffacd686c3cfd1c1e8957aa2d/C4.code-OLS1_GWR1.R
+
 
 ---
 
