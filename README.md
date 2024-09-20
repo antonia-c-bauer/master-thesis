@@ -49,6 +49,9 @@ https://github.com/antonia-c-bauer/master-thesis/blob/08211d522dcc961fd295bfc198
 
 ## B.2 - data
 
+### health outcomes data
+https://github.com/antonia-c-bauer/master-thesis/blob/167ef2943643c5599683932c87be3a6ee523cf54/health%20outcomes%20data%20CID%20R.csv
+
 ## B.4 - code.material
 
 ### B.4 - code.missing.values
