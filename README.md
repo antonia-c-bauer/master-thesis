@@ -4,6 +4,23 @@
 ### A holistic approach to spatial analysis of clusters of health outcomes and health determinants in Portugal
 
 
+subject: A master thesis presented for the degree of Human Geography, Planning and Healthy Territories
+
+university: Universidade de Coimbra
+
+institute: Departamento de Geografia e Turismo
+
+author: Antonia Bauer
+
+matriculation number: 2022166134
+
+supervisor: Prof. Dr. Helena Nogueira
+
+date: Coimbra, 2024
+
+date of submission: 22/09/2024
+
+
 table of content
 
 ---
