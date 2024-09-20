@@ -51,7 +51,7 @@ https://github.com/antonia-c-bauer/master-thesis/blob/b5ccb9dd36dc2447568a77093b
 https://github.com/antonia-c-bauer/master-thesis/blob/fd1567f102f3c9f50038b9a160f54eb3e84bee0c/C.4-code.HCA3.R
 
 ### B.4 - code.OLS1_GWR1
-
+https://github.com/antonia-c-bauer/master-thesis/blob/2981a1bef9fbe7a4dca745120b6e30fa9e62a7e4/C4.code-OLS1_GWR1.R
 
 ---
 
