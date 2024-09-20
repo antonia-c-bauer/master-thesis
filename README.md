@@ -12,13 +12,13 @@ institute: Departamento de Geografia e Turismo
 
 author: Antonia Bauer
 
-matriculation number: 2022166134
+matriculation number: 
 
 supervisor: Prof. Dr. Helena Nogueira
 
 date: Coimbra, 2024
 
-date of submission: 22/09/2024
+date of submission: 
 
 
 ---
