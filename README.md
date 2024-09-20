@@ -28,6 +28,9 @@ date of submission:
 
 ## A.2 - data
 
+### health determinants data
+https://github.com/antonia-c-bauer/master-thesis/blob/dc3a45b5b45f4bee235b9d0473f2a2760fa39cbf/health%20determinants%20data.csv
+
 ## A.4 - code.material
 
 ### A.4 - code.missing.values
