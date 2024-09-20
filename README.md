@@ -21,8 +21,6 @@ date: Coimbra, 2024
 date of submission: 22/09/2024
 
 
-table of content
-
 ---
 
 
